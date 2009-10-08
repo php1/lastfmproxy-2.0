@@ -8,8 +8,11 @@ import sys
 class lastfm:
 
     def __init__(self):
-        self.version = "1.3.1.1"
-        self.platform = "linux"
+        self.version = "1.5.4.24567"
+        self.platform = "win32"
+        self.platformversion = "Windows%20XP"
+        self.player = "winamp"
+        self.api_key = "9d1bbaef3b443eb97973d44181d04e4b"
         self.host = "ws.audioscrobbler.com"
         self.port = 80
         self.info = None
@@ -35,7 +38,7 @@ class lastfm:
     def connect(self, username, password):
 
         s = httpclient.httpclient(self.host, self.port)
-        s.req("/radio/handshake.php?version=" + self.version + "&platform=" + self.platform + "&username=" + username + "&passwordmd5=" + password + "&language=en&player=lastfmproxy")
+        s.req("/radio/handshake.php?version=" + self.version + "&platform=" + self.platform + "&username=" + username + "&passwordmd5=" + password + "&language=en&api_key=" + self.api_key + "&player=" + self.player)
 
         self.info = self.parselines(s.response)
 
@@ -52,6 +55,7 @@ class lastfm:
 
         # debug
         if self.debug:
+            sys.stderr.write("Saving playlist...\n")
             if len(self.playlist.data.tracks):
                 f = open("playlist.xspf", "w")
                 f.write(s.response)
