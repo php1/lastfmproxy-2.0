@@ -8,11 +8,11 @@ import sys
 class lastfm:
 
     def __init__(self):
-        self.version = "1.5.4.24567"
+        self.version = "2.0"
         self.platform = "win32"
         self.platformversion = "Windows%20XP"
-        self.player = "winamp"
-        self.api_key = "9d1bbaef3b443eb97973d44181d04e4b"
+        self.player = "lastfmproxy-2.0"
+        self.api_key = "d50ed5584be64a1564a5d1a12e3fef7f"
         self.host = "ws.audioscrobbler.com"
         self.port = 80
         self.info = None
