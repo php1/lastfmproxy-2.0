@@ -29,7 +29,6 @@ class proxy:
         self.basedir = "."
         self.quit = False
         self.skip = 0
-        self.redirect = 0
         self.stop = False
         self.version = "1.3b"
         self.streaming = 0
@@ -294,11 +293,10 @@ class proxy:
 
             cont = u"np_streaming = " + str(self.streaming) + ";\n"
 
-            if self.streaming == 1:
-
+            if self.streaming:
+               
                 try:
                     title = self.lastfm.playlist.data.title
-                    title = "hello";
                 except:
                     title = "Wait..."
 
@@ -385,7 +383,7 @@ class proxy:
             cont = cont + "<link rel=\"icon\" href=\"/data/favicon.ico\" />\n"
             cont = cont + "<link rel=\"icon\" type=\"image/png\" href=\"/data/nice_favicon.png\" />\n"
             cont = cont + "<link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"data/" + config.theme + ".css\" />\n"
-            cont = cont + "<script type=\"text/javascript\">\n"
+            cont = cont + "<script>\n"
             cont = cont + "var host = 'http://" + http["Host"] + "';\n"
             f = open(os.path.join(self.basedir, "data", "main.js"), "r")
             cont = cont + f.read()
@@ -437,7 +435,7 @@ class proxy:
             cont = cont + gui
 
             cont = cont + "</form>"
-            cont = cont + "<script type=\"text/javascript\">\ntick();\n</script>\n"
+            cont = cont + "<script>\ntick();\n</script>\n"
             cont = cont + "</body></html>\n"
 
             try:
@@ -574,73 +572,52 @@ class proxy:
                 self.skip = 0
 
             track = playlist.data.tracks[playlist.pos]
+
             url = track["location"]
+            url = "%s" % url
+            url = string.split(url, "/", 3)
 
-            self.redirect=1
-            while self.redirect == 1:
+            host = string.split(url[2], ":")
+            if len(host) != 2:
+                host = [ host[0], 80 ]
+            else:
+                host[1] = int(host[1])
 
-                url = "%s" % url
-                url = string.split(url, "/", 3)
+            if self.lastfm.debug:
+                sys.stderr.write("GET http://" + host[0] + ":" + str(host[1]) + "/" + url[3] + " HTTP/1.0\r\n")
 
-                host = string.split(url[2], ":")
-                if len(host) != 2:
-                    host = [ host[0], 80 ]
-                else:
-                    host[1] = int(host[1])
+            # Connect to actual server and request stream
+            streamsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            if config.useproxy:
+                streamsock.connect((config.proxyhost, config.proxyport))
+                streamsock.sendall("GET http://" + host[0] + ":" + str(host[1]) + "/" + url[3] + " HTTP/1.0\r\n")
+            else:
+                streamsock.connect((host[0], host[1]))
+                streamsock.sendall("GET /" + url[3] + " HTTP/1.0\r\n")
+            streamsock.sendall("Host: " + host[0] + "\r\n")
+            streamsock.sendall("\r\n")
+
+            # Read HTTP headers
+            while True:
+                line = ""
+                while True:
+                    c = streamsock.recv(1)
+                    line = line + c
+                    if c == '\n':
+                        break
 
                 if self.lastfm.debug:
-                    sys.stderr.write("GET http://" + host[0] + ":" + str(host[1]) + "/" + url[3] + " HTTP/1.0\r\n")
+                    sys.stderr.write("<<< " + line)
 
-                # Connect to actual server and request stream
-                streamsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                if config.useproxy:
-                    streamsock.connect((config.proxyhost, config.proxyport))
-                    streamsock.sendall("GET http://" + host[0] + ":" + str(host[1]) + "/" + url[3] + " HTTP/1.0\r\n")
-                else:
-                    streamsock.connect((host[0], host[1]))
-                    streamsock.sendall("GET /" + url[3] + " HTTP/1.0\r\n")
-                streamsock.sendall("Host: " + host[0] + "\r\n")
-                streamsock.sendall("\r\n")
-
-                # Read HTTP headers
-                while True:
-                    line = ""
-                    while True:
-                        c = streamsock.recv(1)
-                        line = line + c
-                        if c == '\n':
-                            break
-
-                    if self.lastfm.debug:
-                        sys.stderr.write("<<< " + line)
-
-                    if line[:9] == "Location:":
-                        # get redirected url
-                        tmp = string.split(line, " ")
-                        url = tmp[1][0:-2]
-                        streamsock.close()
-                        self.redirect = 1
+                # Handle "403 Invalid ticket" more gracefully
+                if line[:6] == "HTTP/1":
+                    tmp = string.split(line, " ", 3)
+                    if tmp[1] != "200":
+                        self.skip = 1
                         break
 
-                    # Handle "403 Invalid ticket" more gracefully
-                    if line[:12] == "HTTP/1.1 403":
-                        tmp = string.split(line, " ", 3)
-                        if tmp[1] != "200":
-                            self.skip = 1
-                            self.redirect = 0
-                            break
-
-                    # Escape on "200 OK"
-                    if line[:12] == "HTTP/1.1 200":
-                        self.skip = 0
-                        self.redirect = 0
-                        break
-
-                    if line == "\r\n":
-                        self.redirect = 0
-                        break
-
-
+                if line == "\r\n":
+                    break
 
             if self.skip:
                 continue

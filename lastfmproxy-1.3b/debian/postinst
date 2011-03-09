@@ -1,0 +1,77 @@
+#!/bin/sh -e
+
+if ! ([ "$1" = "configure" ] || [ "$1" = "reconfigure" ]); then
+  exit 0
+fi
+
+
+# set some useful variables
+LASTFMPROXY="lastfmproxy"
+HOME="/var/lib/lastfmproxy"
+CHOWN="/bin/chown"
+CHMOD="/bin/chmod"
+ADDUSER="/usr/sbin/adduser"
+USERDEL="/usr/sbin/userdel"
+USERADD="/usr/sbin/useradd"
+GROUPDEL="/usr/sbin/groupdel"
+GROUPMOD="/usr/sbin/groupmod"
+ID="/usr/bin/id"
+
+
+###
+# 1. get current lastfmproxy uid and gid if user exists.
+set -e
+if $ID $LASTFMPROXY > /dev/null 2>&1; then
+   IUID=`$ID --user $LASTFMPROXY`
+   IGID=`$ID --group $LASTFMPROXY`
+else
+   IUID="NONE"
+   IGID="NONE"
+fi
+
+
+###
+# 2. Ensure that no standard account or group will remain before adding the
+#    new user
+if [ "$IUID" = "NONE" ] || [ $IUID -ge 1000 ]; then # we must do sth :)
+  if ! [ "$IUID" = "NONE" ] && [ $IUID -ge 1000 ]; then
+      # lastfmproxy user exists but isn't a system user... delete it.
+      $USERDEL $LASTFMPROXY
+      $GROUPDEL $LASTFMPROXY
+  fi
+
+###
+# 3. Add the system account.
+#    Issue a debconf warning if it fails. 
+  if $GROUPMOD $LASTFMPROXY > /dev/null 2>&1; then 
+    # lastfmproxy group already exists, use --ingroup
+    if ! $ADDUSER --system --disabled-password --disabled-login --home $HOME --no-create-home --ingroup $LASTFMPROXY $LASTFMPROXY; then
+      echo "The adduser command failed."
+    fi
+  else
+    if ! $ADDUSER --system --disabled-password --disabled-login --home $HOME --no-create-home --group $LASTFMPROXY; then
+      echo "The adduser command failed."
+    fi
+  fi
+fi
+set +e
+
+
+
+
+###
+# 4. change ownership of directory
+$CHOWN $LASTFMPROXY:$LASTFMPROXY $HOME
+$CHOWN -R $LASTFMPROXY:$LASTFMPROXY /var/log/lastfmproxy/
+$CHOWN root:lastfmproxy /etc/lastfmproxy/config.py
+$CHMOD 640 /etc/lastfmproxy/config.py
+
+
+###
+# 5. Remove old stuff..
+if dpkg --compare-versions "$2" lt "1.2-1"; then
+  rm -rf /usr/share/lastfmproxy
+  usermod -d $HOME $LASTFMPROXY
+fi
+
+#DEBHELPER#

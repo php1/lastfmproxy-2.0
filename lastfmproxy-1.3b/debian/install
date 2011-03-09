@@ -1,0 +1,2 @@
+*.py data/ var/lib/lastfmproxy 
+debian/script/lastfmproxy usr/sbin

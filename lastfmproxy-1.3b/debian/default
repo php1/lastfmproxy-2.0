@@ -1,0 +1,5 @@
+# Defaults for lastfminit
+
+# Fill /etc/lastfmproxy/config.py before enabling the proxy..
+START_LASTFMPROXY=false
+ 

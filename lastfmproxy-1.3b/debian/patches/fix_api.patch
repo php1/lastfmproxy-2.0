@@ -1,0 +1,179 @@
+Index: lastfmproxy-1.3b/lastfm.py
+===================================================================
+--- lastfmproxy-1.3b.orig/lastfm.py	2010-12-19 14:37:23.000000000 -0600
++++ lastfmproxy-1.3b/lastfm.py	2010-12-19 14:37:46.000000000 -0600
+@@ -8,8 +8,10 @@
+ class lastfm:
+ 
+     def __init__(self):
+-        self.version = "1.3.1.1"
++        self.version = "1.5.4.24567"
+         self.platform = "linux"
++        self.api_key = "d50ed5584be64a1564a5d1a12e3fef7f"
++        self.player = "LastFMProxy"
+         self.host = "ws.audioscrobbler.com"
+         self.port = 80
+         self.info = None
+@@ -35,7 +37,7 @@
+     def connect(self, username, password):
+ 
+         s = httpclient.httpclient(self.host, self.port)
+-        s.req("/radio/handshake.php?version=" + self.version + "&platform=" + self.platform + "&username=" + username + "&passwordmd5=" + password + "&language=en&player=lastfmproxy")
++        s.req("/radio/handshake.php?version=" + self.version + "&platform=" + self.platform + "&username=" + username + "&passwordmd5=" + password + "&language=en&api_key=" + self.api_key + "&player=" + self.player)
+ 
+         self.info = self.parselines(s.response)
+ 
+Index: lastfmproxy-1.3b/main.py
+===================================================================
+--- lastfmproxy-1.3b.orig/main.py	2010-12-19 14:37:23.000000000 -0600
++++ lastfmproxy-1.3b/main.py	2010-12-19 14:37:51.000000000 -0600
+@@ -29,6 +29,7 @@
+         self.basedir = "."
+         self.quit = False
+         self.skip = 0
++        self.redirect = 0
+         self.stop = False
+         self.version = "1.3b"
+         self.streaming = 0
+@@ -293,10 +294,11 @@
+ 
+             cont = u"np_streaming = " + str(self.streaming) + ";\n"
+ 
+-            if self.streaming:
+-               
++            if self.streaming == 1:
++
+                 try:
+                     title = self.lastfm.playlist.data.title
++                    title = "hello";
+                 except:
+                     title = "Wait..."
+ 
+@@ -383,7 +385,7 @@
+             cont = cont + "<link rel=\"icon\" href=\"/data/favicon.ico\" />\n"
+             cont = cont + "<link rel=\"icon\" type=\"image/png\" href=\"/data/nice_favicon.png\" />\n"
+             cont = cont + "<link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"data/" + config.theme + ".css\" />\n"
+-            cont = cont + "<script>\n"
++            cont = cont + "<script type=\"text/javascript\">\n"
+             cont = cont + "var host = 'http://" + http["Host"] + "';\n"
+             f = open(os.path.join(self.basedir, "data", "main.js"), "r")
+             cont = cont + f.read()
+@@ -435,7 +437,7 @@
+             cont = cont + gui
+ 
+             cont = cont + "</form>"
+-            cont = cont + "<script>\ntick();\n</script>\n"
++            cont = cont + "<script type=\"text/javascript\">\ntick();\n</script>\n"
+             cont = cont + "</body></html>\n"
+ 
+             try:
+@@ -572,52 +574,73 @@
+                 self.skip = 0
+ 
+             track = playlist.data.tracks[playlist.pos]
+-
+             url = track["location"]
+-            url = "%s" % url
+-            url = string.split(url, "/", 3)
+ 
+-            host = string.split(url[2], ":")
+-            if len(host) != 2:
+-                host = [ host[0], 80 ]
+-            else:
+-                host[1] = int(host[1])
++            self.redirect=1
++            while self.redirect == 1:
+ 
+-            if self.lastfm.debug:
+-                sys.stderr.write("GET http://" + host[0] + ":" + str(host[1]) + "/" + url[3] + " HTTP/1.0\r\n")
++                url = "%s" % url
++                url = string.split(url, "/", 3)
+ 
+-            # Connect to actual server and request stream
+-            streamsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+-            if config.useproxy:
+-                streamsock.connect((config.proxyhost, config.proxyport))
+-                streamsock.sendall("GET http://" + host[0] + ":" + str(host[1]) + "/" + url[3] + " HTTP/1.0\r\n")
+-            else:
+-                streamsock.connect((host[0], host[1]))
+-                streamsock.sendall("GET /" + url[3] + " HTTP/1.0\r\n")
+-            streamsock.sendall("Host: " + host[0] + "\r\n")
+-            streamsock.sendall("\r\n")
+-
+-            # Read HTTP headers
+-            while True:
+-                line = ""
++                host = string.split(url[2], ":")
++                if len(host) != 2:
++                    host = [ host[0], 80 ]
++                else:
++                    host[1] = int(host[1])
++
++                if self.lastfm.debug:
++                    sys.stderr.write("GET http://" + host[0] + ":" + str(host[1]) + "/" + url[3] + " HTTP/1.0\r\n")
++
++                # Connect to actual server and request stream
++                streamsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
++                if config.useproxy:
++                    streamsock.connect((config.proxyhost, config.proxyport))
++                    streamsock.sendall("GET http://" + host[0] + ":" + str(host[1]) + "/" + url[3] + " HTTP/1.0\r\n")
++                else:
++                    streamsock.connect((host[0], host[1]))
++                    streamsock.sendall("GET /" + url[3] + " HTTP/1.0\r\n")
++                streamsock.sendall("Host: " + host[0] + "\r\n")
++                streamsock.sendall("\r\n")
++
++                # Read HTTP headers
+                 while True:
+-                    c = streamsock.recv(1)
+-                    line = line + c
+-                    if c == '\n':
++                    line = ""
++                    while True:
++                        c = streamsock.recv(1)
++                        line = line + c
++                        if c == '\n':
++                            break
++
++                    if self.lastfm.debug:
++                        sys.stderr.write("<<< " + line)
++
++                    if line[:9] == "Location:":
++                        # get redirected url
++                        tmp = string.split(line, " ")
++                        url = tmp[1][0:-2]
++                        streamsock.close()
++                        self.redirect = 1
+                         break
+ 
+-                if self.lastfm.debug:
+-                    sys.stderr.write("<<< " + line)
++                    # Handle "403 Invalid ticket" more gracefully
++                    if line[:12] == "HTTP/1.1 403":
++                        tmp = string.split(line, " ", 3)
++                        if tmp[1] != "200":
++                            self.skip = 1
++                            self.redirect = 0
++                            break
++
++                    # Escape on "200 OK"
++                    if line[:12] == "HTTP/1.1 200":
++                        self.skip = 0
++                        self.redirect = 0
++                        break
+ 
+-                # Handle "403 Invalid ticket" more gracefully
+-                if line[:6] == "HTTP/1":
+-                    tmp = string.split(line, " ", 3)
+-                    if tmp[1] != "200":
+-                        self.skip = 1
++                    if line == "\r\n":
++                        self.redirect = 0
+                         break
+ 
+-                if line == "\r\n":
+-                    break
++
+ 
+             if self.skip:
+                 continue

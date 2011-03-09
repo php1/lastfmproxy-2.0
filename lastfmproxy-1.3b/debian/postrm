@@ -1,0 +1,21 @@
+#! /bin/sh
+# postrm script for lastfmproxy
+#
+# see: dh_installdeb(1)
+
+set -e
+
+. /usr/share/debconf/confmodule 
+
+case "$1" in
+    purge)
+	rm -rf /var/lib/lastfmproxy
+    ;;
+    *)
+    ;;
+esac
+
+
+#DEBHELPER#
+
+exit 0

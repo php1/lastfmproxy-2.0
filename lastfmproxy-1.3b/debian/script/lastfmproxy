@@ -1,0 +1,10 @@
+#!/bin/sh
+
+WORKING_DIR=/var/lib/lastfmproxy
+
+cd $WORKING_DIR 
+if [ "$1" != "" ] && touch $1; then
+  /usr/bin/python main.py >> $1
+else
+  /usr/bin/python main.py
+fi

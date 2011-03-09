@@ -1,0 +1,16 @@
+Source: lastfmproxy
+Section: sound
+Priority: extra
+Maintainer: Romain Beauxis <toots@rastageeks.org>
+Build-Depends: @cdbs@
+Standards-Version: 3.9.1
+
+Package: lastfmproxy
+Architecture: all
+Depends: python, adduser, ${misc:Depends}
+Description: proxy server for the last.fm radio streams
+ LastFMProxy allows you to use your regular old audio player 
+ to listen to the last.fm streams. It does this by acting as 
+ a player itself, connecting to the server on your behalf, 
+ but instead of playing the stream, it simply relays it to 
+ whichever other application connecting to it.

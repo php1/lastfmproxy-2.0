@@ -1,0 +1,181 @@
+Index: lastfmproxy-1.3b/main.py
+===================================================================
+--- lastfmproxy-1.3b.orig/main.py	2010-12-19 14:37:31.000000000 -0600
++++ lastfmproxy-1.3b/main.py	2010-12-19 14:37:46.000000000 -0600
+@@ -8,7 +8,7 @@
+ import cgi
+ import os
+ import string
+-
++import datetime
+ import config
+ import lastfm
+ import audioscrobbler
+@@ -43,6 +43,10 @@
+                 "Cache-Control: max-cache=0\r\n"
+                 ], "");
+ 
++    def log_print(self, message):
++        print "[" + datetime.datetime.now().ctime() + "]: " + message
++        sys.stdout.flush()
++
+     def hexify(self, s):
+         result = ""
+         for c in s:
+@@ -101,7 +105,7 @@
+         # Check request method
+         req[0] = string.split(req[0], " ")
+         if len(req[0]) != 3 or req[0][0] != "GET":
+-            print "Unhandled method:", req[0]
++            self.log_print("Unhandled method: " + req[0])
+             try:
+                 clientsock.sendall("HTTP/1.0 405 Method Not Allowed\r\n");
+                 clientsock.sendall("Content-Type: text/html\r\n")
+@@ -254,7 +258,7 @@
+             if res.has_key("response"):
+                 res = res["response"]
+             else:
+-                print "hmm?", repr(res)
++                self.log_print("hmm? " + repr(res))
+                 res = "INTERNALERROR"
+ 
+             cont = "result = '" + res + "';\n"
+@@ -539,7 +543,7 @@
+                     clientsock.sendall(tmp + "\r\n")
+             clientsock.sendall("\r\n")
+         except:
+-            print "Error sending HTTP headers"
++            self.log_print("Error sending HTTP headers")
+             self.stop = True
+ 
+         while not self.quit and not self.stop:
+@@ -551,7 +555,7 @@
+                 if not playlist.data or playlist.pos >= len(playlist.data.tracks):
+                     if not self.lastfm.getplaylist():
+                         
+-                        print "Strangeness! No tracks in playlist? Sending station update..."
++                        self.log_print("Strangeness! No tracks in playlist? Sending station update...")
+                         retries = retries + 1
+                         if retries < 3:
+                             if len(self.bookmarks) >= retries:
+@@ -559,14 +563,14 @@
+                             else:
+                                 tmpstation = "lastfm://user/" + self.username + "/neighbours"
+ 
+-                            print "Trying station " + tmpstation
++                            self.log_print("Trying station " + tmpstation)
+                             res = self.lastfm.changestation(tmpstation)
+                             if res.has_key("response") and res["response"] == "OK":
+                                 if self.lastfm.getplaylist():
+                                     retries = 0
+                                     continue
+ 
+-                        print "Unable to change station or get a playlist. Stopping."
++                        self.log_print("Unable to change station or get a playlist. Stopping.")
+                         self.stop = 1
+                         break
+ 
+@@ -668,7 +672,7 @@
+                     try:
+                         data = streamsock.recv(l)
+                     except socket.error:
+-                        print "Error receiving data from server"
++                        self.log_print("Error receiving data from server")
+                         data = ""
+ 
+                 if data == "":
+@@ -678,7 +682,7 @@
+                         try:
+                             clientsock.sendall("\0" * l)
+                         except socket.error, (val,msg):
+-                            print "Error sending data to client:", msg
++                            self.log_print("Error sending data to client: " + msg)
+                             self.stop = 1
+                             break
+ 
+@@ -688,7 +692,7 @@
+                         try:
+                             clientsock.sendall(icytag)
+                         except socket.error, (val,msg):
+-                            print "Error sending data to client:", msg
++                            self.log_print("Error sending data to client: " + msg)
+                             self.stop = 1
+                             break
+ 
+@@ -706,7 +710,7 @@
+                 try:
+                     clientsock.sendall(data)
+                 except socket.error, (val,msg):
+-                    print "Error sending data to client:", msg
++                    self.log_print("Error sending data to client: " +  msg)
+                     self.stop = 1
+                     break
+ 
+@@ -722,7 +726,7 @@
+                     try:
+                         clientsock.sendall(icytag)
+                     except socket.error, (val,msg):
+-                        print "Error sending data to client:", msg
++                        self.log_print("Error sending data to client:" + msg)
+                         self.stop = 1
+                         break
+ 
+@@ -741,7 +745,7 @@
+         self.streaming = 0
+ 
+     def run(self, bind_address, port):
+-        print "Starting LastFMProxy " + self.version + "..."
++        self.log_print("Starting LastFMProxy " + self.version + "...")
+ 
+         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+         # Set socket options to allow binding to the same address
+@@ -750,20 +754,20 @@
+         s.bind((bind_address, port))
+         s.listen(5)
+ 
+-        print "Connecting to last.fm server..."
++        self.log_print("Connecting to last.fm server...")
+         self.lastfm = lastfm.lastfm();
+         self.lastfm.connect(self.username, self.hexify(md5.md5(self.password).digest()))
+         #print self.lastfm.info
+ 
+         if not self.lastfm.info.has_key("session"):
+-            print "Handshake failed."
+-            print "DEBUG:", self.lastfm.info
++            self.log_print("Handshake failed.")
++            self.log_print("DEBUG: " + self.lastfm.info)
+             s.close()
+             return
+ 
+         if self.lastfm.info["session"] == "FAILED":
+-            print "Handshake failed. Bad login info, perhaps?"
+-            print "DEBUG:", self.lastfm.info
++            self.log_print("Handshake failed. Bad login info, perhaps?")
++            self.log_print("DEBUG: " + self.lastfm.info)
+             s.close()
+             return
+ 
+@@ -789,8 +793,8 @@
+         if bind_address == "127.0.0.1" or bind_address == "0.0.0.0":
+             bind_address = "localhost"
+ 
+-        print "To tune in, point your browser to:"
+-        print "  http://" + bind_address + ":" + str(port) + "/"
++        self.log_print("To tune in, point your browser to:")
++        self.log_print("  http://" + bind_address + ":" + str(port) + "/")
+ 
+         runningthreads = []
+ 
+@@ -807,10 +811,10 @@
+         except KeyboardInterrupt:
+             self.quit = 1
+ 
+-        print "Shutting down..."
++        self.log_print("Shutting down...")
+         for t in runningthreads:
+             t.join()
+-        print "Done! Bye!"
++        self.log_print("Done! Bye!")
+ 
+         s.close()
+         return

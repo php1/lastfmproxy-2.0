@@ -1,0 +1,19 @@
+#!/usr/bin/make -f
+  
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/rules/patchsys-quilt.mk
+
+# Add here any variable or target overrides you need.
+
+# In order to regenerate 'debian/control' :
+#   DEB_AUTO_UPDATE_DEBIAN_CONTROL=yes fakeroot debian/rules clean
+# Then check manually if everything's ok
+
+DEB_INSTALL_MANPAGES_lastfmproxy := debian/lastfmproxy.8
+DEB_INSTALL_CHANGELOGS_lastfmproxy := ChangeLog.txt
+
+binary-install/lastfmproxy::
+	chmod +x debian/lastfmproxy/usr/sbin/lastfmproxy
+	mkdir -p $(CURDIR)/debian/lastfmproxy/etc/lastfmproxy/
+	mv $(CURDIR)/debian/lastfmproxy/var/lib/lastfmproxy/config.py $(CURDIR)/debian/lastfmproxy/etc/lastfmproxy/config.py
+	dh_link etc/lastfmproxy/config.py var/lib/lastfmproxy/config.py

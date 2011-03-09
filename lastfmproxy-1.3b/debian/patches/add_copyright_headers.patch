@@ -1,0 +1,186 @@
+Index: lastfmproxy-1.3b/changestation.py
+===================================================================
+--- lastfmproxy-1.3b.orig/changestation.py	2010-12-19 14:37:36.000000000 -0600
++++ lastfmproxy-1.3b/changestation.py	2010-12-19 14:37:38.000000000 -0600
+@@ -1,5 +1,22 @@
+ #!/usr/bin/python
+ 
++	#Lastfmproxy -- Proxy for last.fm streams
++	#Copyright: 2005-2007, Vidar Madsen <vidarino@gmail.com>
++
++	#This program is free software; you can redistribute it and/or modify
++	#it under the terms of the GNU General Public License as published by
++	#the Free Software Foundation; either version 2 of the License, or
++	#(at your option) any later version.
++
++	#This program is distributed in the hope that it will be useful,
++	#but WITHOUT ANY WARRANTY; without even the implied warranty of
++	#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++	#GNU General Public License for more details.
++
++	#You should have received a copy of the GNU General Public License
++	#along with this program; if not, write to the Free Software
++	#Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++
+ import sys
+ import config
+ import httpclient
+Index: lastfmproxy-1.3b/data/main.js
+===================================================================
+--- lastfmproxy-1.3b.orig/data/main.js	2010-12-19 14:37:36.000000000 -0600
++++ lastfmproxy-1.3b/data/main.js	2010-12-19 14:37:38.000000000 -0600
+@@ -1,3 +1,21 @@
++
++// 	Lastfmproxy -- Proxy for last.fm streams
++// 	Copyright: 2005-2007, Vidar Madsen <vidarino@gmail.com>
++// 
++// 	This program is free software; you can redistribute it and/or modify
++// 	it under the terms of the GNU General Public License as published by
++// 	the Free Software Foundation; either version 2 of the License, or
++// 	(at your option) any later version.
++// 
++// 	This program is distributed in the hope that it will be useful,
++// 	but WITHOUT ANY WARRANTY; without even the implied warranty of
++// 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// 	GNU General Public License for more details.
++// 
++// 	You should have received a copy of the GNU General Public License
++// 	along with this program; if not, write to the Free Software
++// 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++
+ var noupdate = 0;
+ var streaming = -1;
+ var trackprogress = 0;
+Index: lastfmproxy-1.3b/httpclient.py
+===================================================================
+--- lastfmproxy-1.3b.orig/httpclient.py	2010-12-19 14:37:36.000000000 -0600
++++ lastfmproxy-1.3b/httpclient.py	2010-12-19 14:37:38.000000000 -0600
+@@ -1,4 +1,21 @@
+ 
++	#Lastfmproxy -- Proxy for last.fm streams
++	#Copyright: 2005-2007, Vidar Madsen <vidarino@gmail.com>
++
++	#This program is free software; you can redistribute it and/or modify
++	#it under the terms of the GNU General Public License as published by
++	#the Free Software Foundation; either version 2 of the License, or
++	#(at your option) any later version.
++
++	#This program is distributed in the hope that it will be useful,
++	#but WITHOUT ANY WARRANTY; without even the implied warranty of
++	#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++	#GNU General Public License for more details.
++
++	#You should have received a copy of the GNU General Public License
++	#along with this program; if not, write to the Free Software
++	#Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++
+ import base64
+ import config
+ import socket
+Index: lastfmproxy-1.3b/lastfm.py
+===================================================================
+--- lastfmproxy-1.3b.orig/lastfm.py	2010-12-19 14:37:36.000000000 -0600
++++ lastfmproxy-1.3b/lastfm.py	2010-12-19 14:37:38.000000000 -0600
+@@ -1,4 +1,21 @@
+ 
++	#Lastfmproxy -- Proxy for last.fm streams
++	#Copyright: 2005-2007, Vidar Madsen <vidarino@gmail.com>
++
++	#This program is free software; you can redistribute it and/or modify
++	#it under the terms of the GNU General Public License as published by
++	#the Free Software Foundation; either version 2 of the License, or
++	#(at your option) any later version.
++
++	#This program is distributed in the hope that it will be useful,
++	#but WITHOUT ANY WARRANTY; without even the implied warranty of
++	#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++	#GNU General Public License for more details.
++
++	#You should have received a copy of the GNU General Public License
++	#along with this program; if not, write to the Free Software
++	#Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++
+ import httpclient
+ import time
+ import string
+Index: lastfmproxy-1.3b/main.py
+===================================================================
+--- lastfmproxy-1.3b.orig/main.py	2010-12-19 14:37:36.000000000 -0600
++++ lastfmproxy-1.3b/main.py	2010-12-19 14:37:38.000000000 -0600
+@@ -1,5 +1,22 @@
+ #!/usr/bin/python
+ 
++	#Lastfmproxy -- Proxy for last.fm streams
++	#Copyright: 2005-2007, Vidar Madsen <vidarino@gmail.com>
++
++	#This program is free software; you can redistribute it and/or modify
++	#it under the terms of the GNU General Public License as published by
++	#the Free Software Foundation; either version 2 of the License, or
++	#(at your option) any later version.
++
++	#This program is distributed in the hope that it will be useful,
++	#but WITHOUT ANY WARRANTY; without even the implied warranty of
++	#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++	#GNU General Public License for more details.
++
++	#You should have received a copy of the GNU General Public License
++	#along with this program; if not, write to the Free Software
++	#Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++
+ import sys
+ import time
+ import socket
+Index: lastfmproxy-1.3b/playlist.py
+===================================================================
+--- lastfmproxy-1.3b.orig/playlist.py	2010-12-19 14:37:36.000000000 -0600
++++ lastfmproxy-1.3b/playlist.py	2010-12-19 14:37:38.000000000 -0600
+@@ -1,4 +1,22 @@
+ 
++       #Lastfmproxy -- Proxy for last.fm streams
++       #Copyright: 2005-2007, Vidar Madsen <vidarino@gmail.com>
++
++       #This program is free software; you can redistribute it and/or modify
++       #it under the terms of the GNU General Public License as published by
++       #the Free Software Foundation; either version 2 of the License, or
++       #(at your option) any later version.
++
++       #This program is distributed in the hope that it will be useful,
++       #but WITHOUT ANY WARRANTY; without even the implied warranty of
++       #MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++       #GNU General Public License for more details.
++
++       #You should have received a copy of the GNU General Public License
++       #along with this program; if not, write to the Free Software
++       #Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++
++
+ import xspf
+ 
+ class playlist:
+Index: lastfmproxy-1.3b/xspf.py
+===================================================================
+--- lastfmproxy-1.3b.orig/xspf.py	2010-12-19 14:37:36.000000000 -0600
++++ lastfmproxy-1.3b/xspf.py	2010-12-19 14:37:38.000000000 -0600
+@@ -1,3 +1,22 @@
++
++       #Lastfmproxy -- Proxy for last.fm streams
++       #Copyright: 2005-2007, Vidar Madsen <vidarino@gmail.com>
++
++       #This program is free software; you can redistribute it and/or modify
++       #it under the terms of the GNU General Public License as published by
++       #the Free Software Foundation; either version 2 of the License, or
++       #(at your option) any later version.
++
++       #This program is distributed in the hope that it will be useful,
++       #but WITHOUT ANY WARRANTY; without even the implied warranty of
++       #MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++       #GNU General Public License for more details.
++
++       #You should have received a copy of the GNU General Public License
++       #along with this program; if not, write to the Free Software
++       #Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++
++
+ from xml.sax import make_parser, handler, SAXParseException
+ import xml.sax
+ 
